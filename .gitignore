@@ -1,0 +1,33 @@
+# CMake / CLion
+cmake-build-*/
+CMakeLists.txt.user
+.idea/
+
+# Build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.out
+
+# Object files
+*.o
+*.obj
+*.pch
+
+# Logs and temporary files
+*.log
+*~
+.DS_Store
+
+# Rider/ReSharper
+_ReSharper.*/
+*.sln.DotSettings.user
+
+# VS Code
+.vscode/
+
+# Compiled Shader Files (if checked into build dir, adjust if they are source)
+# *.spv
