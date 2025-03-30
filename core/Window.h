@@ -8,7 +8,7 @@
 #include <string>
 #include <vulkan/vulkan.h>
 
-namespace VkGameProjectOne {
+namespace vk_project_one {
     // Use new namespace
 
     class Window {

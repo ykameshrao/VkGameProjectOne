@@ -51,7 +51,7 @@ const bool enableValidationLayers = true;
         throw std::runtime_error(std::string(msg) + " failed!"); \
     }
 
-namespace VkGameProjectOne {
+namespace vk_project_one {
     // --- Static Helper Functions ---
 
     // Read shader SPIR-V file
@@ -366,7 +366,7 @@ namespace VkGameProjectOne {
 
     // --- Device Selection ---
     QueueFamilyIndices VulkanEngine::findQueueFamilies(VkPhysicalDevice queryDevice) const {
-        VkGameProjectOne::QueueFamilyIndices indices;
+        vk_project_one::QueueFamilyIndices indices;
         uint32_t queueFamilyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(queryDevice, &queueFamilyCount, nullptr);
         std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
@@ -451,7 +451,7 @@ namespace VkGameProjectOne {
         // spdlog::debug("  Device Name: {}", deviceProperties.deviceName);
 
         // Check for required queue families
-        VkGameProjectOne::QueueFamilyIndices indices = findQueueFamilies(queryDevice);
+        vk_project_one::QueueFamilyIndices indices = findQueueFamilies(queryDevice);
         if (!indices.isComplete()) {
             spdlog::warn("  Device missing required queue families.");
             return false;
@@ -522,7 +522,7 @@ namespace VkGameProjectOne {
 
     void VulkanEngine::createLogicalDevice() {
         spdlog::debug("Creating logical device...");
-        VkGameProjectOne::QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+        vk_project_one::QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
         // Use a set to handle cases where graphics and present families are the same
@@ -684,7 +684,7 @@ namespace VkGameProjectOne {
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // Draw directly to images
 
         // Handle queue families (concurrent vs exclusive)
-        VkGameProjectOne::QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+        vk_project_one::QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
         uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
         if (indices.graphicsFamily != indices.presentFamily) {
@@ -1027,7 +1027,7 @@ namespace VkGameProjectOne {
 
     void VulkanEngine::createCommandPool() {
         spdlog::debug("Creating command pool...");
-        VkGameProjectOne::QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
+        vk_project_one::QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
 
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

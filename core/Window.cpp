@@ -5,7 +5,7 @@
 #include <cmake-build-debug/_deps/spdlog-src/include/spdlog/spdlog.h>
 #include <stdexcept>
 
-namespace VkGameProjectOne {
+namespace vk_project_one {
     // Use new namespace
 
     Window::Window(int width, int height, std::string title) {

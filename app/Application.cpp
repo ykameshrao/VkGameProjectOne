@@ -3,10 +3,10 @@
 
 #include "Application.h"
 
-namespace VkGameProjectOne {
+namespace vk_project_one {
     Application::Application() {
         spdlog::info("Initializing Application...");
-        window = std::make_unique<Window>(800, 600, "VkGameProjectOne v0.1");
+        window = std::make_unique<Window>(800, 600, "VkProjectOne v0.1");
         vulkanEngine = std::make_unique<VulkanEngine>(window->getSdlWindow());
         spdlog::info("Application Initialized.");
     }

@@ -16,7 +16,7 @@
 // Forward declare SDL_Window instead of including full SDL.h
 struct SDL_Window;
 
-namespace VkGameProjectOne {
+namespace vk_project_one {
     // Simple vertex structure matching shader layout(location=...)
     struct Vertex {
         glm::vec3 pos;
@@ -203,7 +203,7 @@ namespace VkGameProjectOne {
             std::vector<VkPresentModeKHR> presentModes;
         };
 
-        VkGameProjectOne::QueueFamilyIndices findQueueFamilies(VkPhysicalDevice queryDevice) const;
+        vk_project_one::QueueFamilyIndices findQueueFamilies(VkPhysicalDevice queryDevice) const;
 
         static bool checkDeviceExtensionSupport(VkPhysicalDevice queryDevice);
 

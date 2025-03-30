@@ -8,11 +8,11 @@
 #include <cstdlib>
 
 int main(int argc, char *argv[]) {
-    common::InitializeLogging("VkGameProjectOne");
-    spdlog::info("Starting VkGameProjectOne Application...");
+    common::InitializeLogging("VkProjectOne");
+    spdlog::info("Starting VkProjectOne Application...");
 
     try {
-        VkGameProjectOne::Application app;
+        const vk_project_one::Application app;
         app.run();
     } catch (const std::exception &e) {
         spdlog::critical("Unhandled exception caught in main: {}", e.what());
@@ -22,6 +22,6 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    spdlog::info("VkGameProjectOne finished successfully.");
+    spdlog::info("VkProjectOne finished successfully.");
     return EXIT_SUCCESS;
 }

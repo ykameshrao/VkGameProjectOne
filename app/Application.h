@@ -11,7 +11,7 @@
 #include <memory>
 
 // Use the new project namespace
-namespace VkGameProjectOne {
+namespace vk_project_one {
 
 class Application {
 public:
