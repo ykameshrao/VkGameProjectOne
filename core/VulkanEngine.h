@@ -13,6 +13,8 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE // Vulkan clip space is [0, 1]
 #include <cmake-build-debug/_deps/glm-src/glm/glm.hpp>
 
+#include "Terrain.h"
+
 // Forward declare SDL_Window instead of including full SDL.h
 struct SDL_Window;
 
@@ -128,6 +130,13 @@ namespace vk_project_one {
         std::vector<VkDeviceMemory> uniformBuffersMemory;
         std::vector<void *> uniformBuffersMapped; // Persistently mapped pointers
 
+        // --- Terrain Buffers ---
+        VkBuffer terrainVertexBuffer = VK_NULL_HANDLE;
+        VkDeviceMemory terrainVertexBufferMemory = VK_NULL_HANDLE;
+        VkBuffer terrainIndexBuffer = VK_NULL_HANDLE;
+        VkDeviceMemory terrainIndexBufferMemory = VK_NULL_HANDLE;
+        uint32_t terrainIndexCount = 0; // Store the number of indices
+
         // --- Descriptors ---
         VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
         std::vector<VkDescriptorSet> descriptorSets;
@@ -139,9 +148,15 @@ namespace vk_project_one {
         uint32_t currentFrame = 0;
         bool framebufferResized = false; // Flag to signal swapchain recreation needed
 
+        // --- Private Helper Method Declarations ---
+
         void initVulkan();
 
         void createInstance();
+
+        void createTerrainVertexBuffer(const std::vector<VkProjectOne::TerrainVertex>& vertices);
+
+        void createTerrainIndexBuffer(const std::vector<uint32_t>& indices);
 
         void setupDebugMessenger();
 

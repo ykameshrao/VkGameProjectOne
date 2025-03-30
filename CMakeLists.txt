@@ -23,7 +23,33 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/g-truc/glm.git
         GIT_TAG 1.0.1
 )
-FetchContent_MakeAvailable(glm) # This makes GLM available
+FetchContent_MakeAvailable(glm)
+
+# --- Download stb_image.h using file(DOWNLOAD) ---
+set(STB_DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/_deps/stb-download)
+set(STB_IMAGE_HEADER ${STB_DOWNLOAD_DIR}/stb_image.h)
+set(STB_IMAGE_URL "https://raw.githubusercontent.com/nothings/stb/master/stb_image.h")
+
+file(MAKE_DIRECTORY ${STB_DOWNLOAD_DIR})
+
+if(NOT EXISTS ${STB_IMAGE_HEADER})
+    message(STATUS "Downloading stb_image.h from ${STB_IMAGE_URL}")
+    file(DOWNLOAD
+            ${STB_IMAGE_URL}
+            ${STB_IMAGE_HEADER}
+            SHOW_PROGRESS
+            STATUS download_status
+            TIMEOUT 60
+    )
+    list(GET download_status 0 download_error_code)
+    list(GET download_status 1 download_error_string)
+    if(NOT download_error_code EQUAL 0)
+        message(FATAL_ERROR "Failed to download stb_image.h: ${download_error_string}")
+    endif()
+    message(STATUS "Downloaded stb_image.h successfully.")
+else()
+    message(STATUS "stb_image.h already exists. Skipping download.")
+endif()
 
 # --- Find Standard Dependencies ---
 find_package(SDL2 REQUIRED)
@@ -39,6 +65,10 @@ add_executable(VkGameProjectOne
         app/Application.cpp
         core/Window.cpp
         core/VulkanEngine.cpp
+        core/TerrainLoader.cpp
+        core/TerrainLoader.h
+        core/Terrain.cpp
+        core/Terrain.h
 )
 
 # --- Shader Copying ---
@@ -61,11 +91,27 @@ foreach (SHADER_FILE ${SHADER_FILES})
     message(STATUS "Configured copy for: ${SHADER_FILENAME} -> ${SHADER_DEST_DIR}")
 endforeach ()
 
+# --- Copy Assets Directory ---
+set(SOURCE_ASSET_DIR ${CMAKE_CURRENT_SOURCE_DIR}/assets)
+set(DEST_ASSET_DIR ${CMAKE_BINARY_DIR}/assets)
+
+if(EXISTS ${SOURCE_ASSET_DIR})
+    message(STATUS "Source assets directory found: ${SOURCE_ASSET_DIR}")
+    file(COPY
+            ${SOURCE_ASSET_DIR}/ # Note the trailing slash: copies CONTENTS
+            DESTINATION ${DEST_ASSET_DIR} # Copies into this directory
+    )
+    message(STATUS "Copied assets from ${SOURCE_ASSET_DIR}/ to ${DEST_ASSET_DIR}")
+else()
+    message(WARNING "Source assets directory not found: ${SOURCE_ASSET_DIR} - Cannot copy assets.")
+endif()
+
 # --- Link Dependencies ---
 target_include_directories(VkGameProjectOne PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${SDL2_INCLUDE_DIRS}
         ${Vulkan_INCLUDE_DIRS}
+        ${STB_DOWNLOAD_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 

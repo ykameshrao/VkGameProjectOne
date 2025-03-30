@@ -1,4 +1,3 @@
-
 // VulkanEngine.cpp
 
 #include "VulkanEngine.h"
@@ -20,6 +19,8 @@
 #include <SDL_events.h>
 #include <cmake-build-debug/_deps/glm-src/glm/glm.hpp>
 #include <cmake-build-debug/_deps/glm-src/glm/gtc/matrix_transform.hpp>
+
+#include "TerrainLoader.h"
 
 // --- Constants ---
 constexpr int MAX_FRAMES_IN_FLIGHT = 2;
@@ -209,6 +210,21 @@ namespace vk_project_one {
         createDescriptorSets();
         createCommandBuffers();
         createSyncObjects();
+        std::vector<VkProjectOne::TerrainVertex> terrainVertices;
+        std::vector<uint32_t> terrainIndices;
+        // Adjust path, scales as needed
+        if (VkProjectOne::TerrainLoader::LoadFromHeightmap("assets/heightmaps/terrain_one_hmap.png", 1.0f, 10.0f,
+                                                           terrainVertices, terrainIndices)) {
+            terrainIndexCount = terrainIndices.size(); // Store index count member
+            // Now call your Vulkan buffer creation functions using these vectors
+            createTerrainVertexBuffer(terrainVertices); // You'll need to write this helper
+            createTerrainIndexBuffer(terrainIndices); // You'll need to write this helper
+            spdlog::info("Terrain mesh loaded and Vulkan buffers created.");
+        } else {
+            // Handle error - perhaps throw an exception or default to no terrain
+            spdlog::error("Failed to load terrain mesh data.");
+            throw std::runtime_error("Failed to load terrain mesh data.");
+        }
         spdlog::debug("Vulkan initialization sequence complete.");
     }
 
@@ -224,7 +240,7 @@ namespace vk_project_one {
 
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "VkGameProjectOne";
+        appInfo.pApplicationName = "VkProjectOne";
         appInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
         appInfo.pEngineName = "Custom Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -1613,6 +1629,120 @@ namespace vk_project_one {
         spdlog::info("Swap chain recreated successfully.");
     }
 
+    void VulkanEngine::createTerrainVertexBuffer(const std::vector<VkProjectOne::TerrainVertex> &vertices) {
+        if (vertices.empty()) {
+            spdlog::warn("Attempted to create terrain vertex buffer with empty vertex data.");
+            // Ensure old buffers are potentially cleaned up if recreating
+            if (terrainVertexBuffer != VK_NULL_HANDLE) vkDestroyBuffer(device, terrainVertexBuffer, nullptr);
+            if (terrainVertexBufferMemory != VK_NULL_HANDLE) vkFreeMemory(device, terrainVertexBufferMemory, nullptr);
+            terrainVertexBuffer = VK_NULL_HANDLE;
+            terrainVertexBufferMemory = VK_NULL_HANDLE;
+            return;
+        }
+
+        spdlog::debug("Creating terrain vertex buffer...");
+        VkDeviceSize bufferSize = sizeof(VkProjectOne::TerrainVertex) * vertices.size();
+        spdlog::debug("  Terrain vertex data size: {} bytes ({} vertices)", bufferSize, vertices.size());
+
+        // 1. Create Staging Buffer (CPU visible)
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize,
+                     VK_BUFFER_USAGE_TRANSFER_SRC_BIT, // Source for transfer
+                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // CPU writeable
+                     stagingBuffer, stagingBufferMemory);
+        spdlog::trace("  Staging buffer created.");
+
+        // 2. Map memory, copy data, unmap
+        void *data;
+        VK_CHECK(vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data),
+                 "Failed to map terrain vertex staging buffer");
+        memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
+        vkUnmapMemory(device, stagingBufferMemory);
+        spdlog::trace("  Vertex data copied to staging buffer.");
+
+        // 3. Create Final Vertex Buffer (GPU local)
+        // Destroy old buffer if it exists (e.g., during swapchain recreation if terrain changes)
+        if (terrainVertexBuffer != VK_NULL_HANDLE) vkDestroyBuffer(device, terrainVertexBuffer, nullptr);
+        if (terrainVertexBufferMemory != VK_NULL_HANDLE) vkFreeMemory(device, terrainVertexBufferMemory, nullptr);
+
+        createBuffer(bufferSize,
+                     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                     // Destination and Vertex buffer usage
+                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, // Optimal GPU memory
+                     this->terrainVertexBuffer, this->terrainVertexBufferMemory);
+        spdlog::trace("  Device-local vertex buffer created.");
+
+        // 4. Copy from Staging Buffer to Final Buffer (using command buffer)
+        copyBuffer(stagingBuffer, this->terrainVertexBuffer, bufferSize);
+        spdlog::trace("  Data copied from staging to device-local vertex buffer.");
+
+        // 5. Cleanup Staging Buffer
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+        spdlog::trace("  Staging buffer destroyed.");
+
+        spdlog::info("Terrain vertex buffer created successfully.");
+    }
+
+
+    void VulkanEngine::createTerrainIndexBuffer(const std::vector<uint32_t> &indices) {
+        if (indices.empty()) {
+            spdlog::warn("Attempted to create terrain index buffer with empty index data.");
+            if (terrainIndexBuffer != VK_NULL_HANDLE) vkDestroyBuffer(device, terrainIndexBuffer, nullptr);
+            if (terrainIndexBufferMemory != VK_NULL_HANDLE) vkFreeMemory(device, terrainIndexBufferMemory, nullptr);
+            terrainIndexBuffer = VK_NULL_HANDLE;
+            terrainIndexBufferMemory = VK_NULL_HANDLE;
+            terrainIndexCount = 0;
+            return;
+        }
+
+        spdlog::debug("Creating terrain index buffer...");
+        VkDeviceSize bufferSize = sizeof(uint32_t) * indices.size();
+        this->terrainIndexCount = static_cast<uint32_t>(indices.size()); // Store index count
+        spdlog::debug("  Terrain index data size: {} bytes ({} indices)", bufferSize, this->terrainIndexCount);
+
+
+        // 1. Create Staging Buffer
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        createBuffer(bufferSize,
+                     VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                     stagingBuffer, stagingBufferMemory);
+        spdlog::trace("  Staging buffer created.");
+
+        // 2. Map memory, copy data, unmap
+        void *data;
+        VK_CHECK(vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data),
+                 "Failed to map terrain index staging buffer");
+        memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
+        vkUnmapMemory(device, stagingBufferMemory);
+        spdlog::trace("  Index data copied to staging buffer.");
+
+        // 3. Create Final Index Buffer (GPU local)
+        if (terrainIndexBuffer != VK_NULL_HANDLE) vkDestroyBuffer(device, terrainIndexBuffer, nullptr);
+        if (terrainIndexBufferMemory != VK_NULL_HANDLE) vkFreeMemory(device, terrainIndexBufferMemory, nullptr);
+
+        createBuffer(bufferSize,
+                     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                     // Destination and Index buffer usage
+                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                     this->terrainIndexBuffer, this->terrainIndexBufferMemory);
+        spdlog::trace("  Device-local index buffer created.");
+
+
+        // 4. Copy from Staging Buffer to Final Buffer
+        copyBuffer(stagingBuffer, this->terrainIndexBuffer, bufferSize);
+        spdlog::trace("  Data copied from staging to device-local index buffer.");
+
+        // 5. Cleanup Staging Buffer
+        vkDestroyBuffer(device, stagingBuffer, nullptr);
+        vkFreeMemory(device, stagingBufferMemory, nullptr);
+        spdlog::trace("  Staging buffer destroyed.");
+
+        spdlog::info("Terrain index buffer created successfully.");
+    }
 
     // --- Main Cleanup Method ---
 
@@ -1620,6 +1750,43 @@ namespace vk_project_one {
         spdlog::debug("Starting main VulkanEngine cleanup...");
         // Cleanup swapchain first (calls vkDeviceWaitIdle implicitly via recreate or explicitly in destructor)
         cleanupSwapChain(); // Ensures swapchain resources are gone first
+
+        // --- Clean up Terrain Buffers ---
+        spdlog::debug("Cleaning up terrain buffers...");
+        if (terrainVertexBuffer != VK_NULL_HANDLE) {
+            if (device != VK_NULL_HANDLE) { // Check device validity too
+                vkDestroyBuffer(device, terrainVertexBuffer, nullptr);
+                terrainVertexBuffer = VK_NULL_HANDLE; // Set to null after destroy
+            } else {
+                spdlog::warn("Device handle was null when trying to destroy terrainVertexBuffer.");
+            }
+        }
+        if (terrainVertexBufferMemory != VK_NULL_HANDLE) {
+            if (device != VK_NULL_HANDLE) {
+                vkFreeMemory(device, terrainVertexBufferMemory, nullptr);
+                terrainVertexBufferMemory = VK_NULL_HANDLE;
+            } else {
+                spdlog::warn("Device handle was null when trying to free terrainVertexBufferMemory.");
+            }
+        }
+        if (terrainIndexBuffer != VK_NULL_HANDLE) {
+            if (device != VK_NULL_HANDLE) {
+                vkDestroyBuffer(device, terrainIndexBuffer, nullptr);
+                terrainIndexBuffer = VK_NULL_HANDLE;
+            }
+            else {
+                spdlog::warn("Device handle was null when trying to destroy terrainIndexBuffer.");
+            }
+        }
+        if (terrainIndexBufferMemory != VK_NULL_HANDLE) {
+            if (device != VK_NULL_HANDLE) {
+                vkFreeMemory(device, terrainIndexBufferMemory, nullptr);
+                terrainIndexBufferMemory = VK_NULL_HANDLE;
+            } else {
+                spdlog::warn("Device handle was null when trying to free terrainIndexBufferMemory.");
+            }
+        }
+        // --- End Terrain Buffer Cleanup ---
 
         // Destroy objects created before swapchain dependencies
         if (descriptorSetLayout != VK_NULL_HANDLE) vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
