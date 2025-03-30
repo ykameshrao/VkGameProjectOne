@@ -1,6 +1,6 @@
-# VkGameProjectOne
+# VkProjectOne
 
-## Compiler shaders
+## Compiler Shaders
 
 1. Create directories if they don't exist
    ```mkdir -p shaders/compiled```
