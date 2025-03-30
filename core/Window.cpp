@@ -1,8 +1,8 @@
 
 // Window.cpp
 
-#include "Window.h"
-#include <spdlog/spdlog.h> // Use spdlog
+#include "core/Window.h"
+#include <cmake-build-debug/_deps/spdlog-src/include/spdlog/spdlog.h>
 #include <stdexcept>
 
 namespace VkGameProjectOne {
@@ -22,10 +22,10 @@ namespace VkGameProjectOne {
             width,
             height,
             SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN
-            );
+        );
 
         if (sdlWindow == nullptr) {
-            const char* sdlError = SDL_GetError();
+            const char *sdlError = SDL_GetError();
             std::string errorMsg = "SDL_CreateWindow failed";
             if (sdlError && strlen(sdlError) > 0 && strcmp(sdlError, "Unknown error") != 0) {
                 errorMsg += ": ";

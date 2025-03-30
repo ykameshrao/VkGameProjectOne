@@ -2,18 +2,11 @@
 // Application.cpp
 
 #include "Application.h"
-#include "Window.h"       // Include full headers in cpp
-#include "VulkanEngine.h"
-#include <spdlog/spdlog.h> // For logging
-#include <stdexcept>
-#include <chrono>
 
 namespace VkGameProjectOne {
     Application::Application() {
         spdlog::info("Initializing Application...");
-        // Update window title
         window = std::make_unique<Window>(800, 600, "VkGameProjectOne v0.1");
-        // Pass window handle to engine
         vulkanEngine = std::make_unique<VulkanEngine>(window->getSdlWindow());
         spdlog::info("Application Initialized.");
     }
@@ -36,7 +29,6 @@ namespace VkGameProjectOne {
 
         while (!quit) {
             while (SDL_PollEvent(&e) != 0) {
-                /* ... event handling ... */
                 if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
                     quit = true;
                 }
@@ -47,7 +39,7 @@ namespace VkGameProjectOne {
             }
 
             auto currentTime = std::chrono::high_resolution_clock::now();
-            float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+            const float time = std::chrono::duration<float>(currentTime - startTime).count();
             vulkanEngine->updateCubeRotation(time); // Update UBO based on time
 
             try {

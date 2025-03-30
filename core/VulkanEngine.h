@@ -1,19 +1,17 @@
 
 // VulkanEngine.h
 
-#pragma once // Include guard
+#pragma once
 #define VK_ENABLE_BETA_EXTENSIONS 1
-// External dependencies used in the header
 #include <vector>
 #include <optional>
-#include <string> // For exception messages
-#include <stdexcept> // For std::runtime_error base class
+#include <stdexcept>
 #include <vulkan/vulkan.h>
 
 // GLM math library
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE // Vulkan clip space is [0, 1]
-#include <glm/glm.hpp>
+#include <cmake-build-debug/_deps/glm-src/glm/glm.hpp>
 
 // Forward declare SDL_Window instead of including full SDL.h
 struct SDL_Window;
@@ -141,8 +139,6 @@ namespace VkGameProjectOne {
         uint32_t currentFrame = 0;
         bool framebufferResized = false; // Flag to signal swapchain recreation needed
 
-
-        // --- Private Initialization Methods ---
         void initVulkan();
 
         void createInstance();

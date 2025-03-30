@@ -1,5 +1,8 @@
 # CMake / CLion
 cmake-build-*/
+cmake-build-debug/
+cmake-build-debug/*/**
+cmake-build-debug/**
 CMakeLists.txt.user
 .idea/
 

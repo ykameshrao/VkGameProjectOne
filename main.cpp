@@ -1,14 +1,13 @@
 
 // main.cpp
 
-#include "Application.h" // App class within VkGameProjectOne namespace
-#include "common/Log.h"         // Logging setup helper
+#include "app/Application.h"
+#include "common/Log.h"
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <cstdlib>
 
 int main(int argc, char *argv[]) {
-    // Initialize logging FIRST
     common::InitializeLogging("VkGameProjectOne");
     spdlog::info("Starting VkGameProjectOne Application...");
 

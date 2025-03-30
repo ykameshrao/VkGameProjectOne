@@ -1,30 +1,28 @@
 
 // VulkanEngine.cpp
 
-#include "VulkanEngine.h" // Include the header declaring the class
+#include "VulkanEngine.h"
 
 // Core Libraries
-#include <spdlog/spdlog.h>
+#include <cmake-build-debug/_deps/spdlog-src/include/spdlog/spdlog.h>
 #include <stdexcept>
 #include <vector>
 #include <set>
 #include <string>
 #include <optional>
 #include <fstream>
-#include <array>
 #include <chrono>
-#include <algorithm>
 
 // Dependencies
 #include <SDL2/SDL_vulkan.h> // For surface creation and drawable size
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE // Vulkan clip space
 #include <SDL_events.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <cmake-build-debug/_deps/glm-src/glm/glm.hpp>
+#include <cmake-build-debug/_deps/glm-src/glm/gtc/matrix_transform.hpp>
 
 // --- Constants ---
-const int MAX_FRAMES_IN_FLIGHT = 2;
+constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
 // List of validation layers to enable (if requested)
 const std::vector<const char *> validationLayers = {
@@ -82,8 +80,8 @@ namespace VkGameProjectOne {
     VKAPI_ATTR VkBool32 VKAPI_CALL VulkanEngine::debugCallback(
         VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         VkDebugUtilsMessageTypeFlagsEXT messageType,
-        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-        void* pUserData) {
+        const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+        void *pUserData) {
         switch (messageSeverity) {
             case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
                 spdlog::trace("[Vulkan Debug] {}", pCallbackData->pMessage);
@@ -98,7 +96,8 @@ namespace VkGameProjectOne {
                 spdlog::error("[Vulkan Debug] {}", pCallbackData->pMessage);
                 break;
             default:
-                spdlog::info("[Vulkan Debug] (Severity {}) {}", static_cast<int>(messageSeverity), pCallbackData->pMessage);
+                spdlog::info("[Vulkan Debug] (Severity {}) {}", static_cast<int>(messageSeverity),
+                             pCallbackData->pMessage);
                 break;
         }
         return VK_FALSE; // Don't abort the Vulkan call
@@ -178,7 +177,8 @@ namespace VkGameProjectOne {
             VkResult waitResult = vkDeviceWaitIdle(device);
             if (waitResult != VK_SUCCESS) {
                 // Log error but continue cleanup if possible
-                spdlog::error("vkDeviceWaitIdle failed during VulkanEngine destruction! VkResult: {}", static_cast<int>(waitResult));
+                spdlog::error("vkDeviceWaitIdle failed during VulkanEngine destruction! VkResult: {}",
+                              static_cast<int>(waitResult));
             }
         }
         cleanup();
@@ -628,7 +628,8 @@ namespace VkGameProjectOne {
         // If currentExtent is defined, use it
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             spdlog::debug("Chosen swap extent: {}x{} (from capabilities.currentExtent)",
-                          static_cast<int>(capabilities.currentExtent.width), static_cast<int>(capabilities.currentExtent.height));
+                          static_cast<int>(capabilities.currentExtent.width),
+                          static_cast<int>(capabilities.currentExtent.height));
             return capabilities.currentExtent;
         } else {
             // Otherwise, get size from SDL window and clamp to capabilities
@@ -1559,8 +1560,9 @@ namespace VkGameProjectOne {
                 uniformBuffersMapped[i] = nullptr;
             }
             if (uniformBuffers[i] != VK_NULL_HANDLE) vkDestroyBuffer(device, uniformBuffers[i], nullptr);
-            if (uniformBuffersMemory.size() > i && uniformBuffersMemory[i] != VK_NULL_HANDLE) vkFreeMemory(
-                device, uniformBuffersMemory[i], nullptr);
+            if (uniformBuffersMemory.size() > i && uniformBuffersMemory[i] != VK_NULL_HANDLE)
+                vkFreeMemory(
+                    device, uniformBuffersMemory[i], nullptr);
         }
         uniformBuffers.clear();
         uniformBuffersMemory.clear();
@@ -1589,7 +1591,8 @@ namespace VkGameProjectOne {
         // Wait for current operations to complete before destroying old resources
         VkResult waitResult = vkDeviceWaitIdle(device);
         if (waitResult != VK_SUCCESS) {
-            spdlog::error("vkDeviceWaitIdle failed before swapchain recreation! VkResult: {}", static_cast<int>(waitResult));
+            spdlog::error("vkDeviceWaitIdle failed before swapchain recreation! VkResult: {}",
+                          static_cast<int>(waitResult));
             // Attempt to continue, but things might be unstable
         }
 
@@ -1635,10 +1638,12 @@ namespace VkGameProjectOne {
         // Destroy sync objects
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i) {
             // Check vector size before accessing index
-            if (renderFinishedSemaphores.size() > i && renderFinishedSemaphores[i]) vkDestroySemaphore(
-                device, renderFinishedSemaphores[i], nullptr);
-            if (imageAvailableSemaphores.size() > i && imageAvailableSemaphores[i]) vkDestroySemaphore(
-                device, imageAvailableSemaphores[i], nullptr);
+            if (renderFinishedSemaphores.size() > i && renderFinishedSemaphores[i])
+                vkDestroySemaphore(
+                    device, renderFinishedSemaphores[i], nullptr);
+            if (imageAvailableSemaphores.size() > i && imageAvailableSemaphores[i])
+                vkDestroySemaphore(
+                    device, imageAvailableSemaphores[i], nullptr);
             if (inFlightFences.size() > i && inFlightFences[i]) vkDestroyFence(device, inFlightFences[i], nullptr);
         }
         renderFinishedSemaphores.clear();

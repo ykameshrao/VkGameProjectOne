@@ -2,8 +2,12 @@
 // Application.h
 
 #pragma once
-#include "Window.h"       // Forward declare or include full header
-#include "VulkanEngine.h" // Forward declare or include full header
+#include "core/Window.h"
+#include "core/VulkanEngine.h"
+#include <spdlog/spdlog.h>
+#include <stdexcept>
+#include <chrono>
+
 #include <memory>
 
 // Use the new project namespace
