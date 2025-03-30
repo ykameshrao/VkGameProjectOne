@@ -219,6 +219,10 @@ namespace vk_project_one {
             // Now call your Vulkan buffer creation functions using these vectors
             createTerrainVertexBuffer(terrainVertices); // You'll need to write this helper
             createTerrainIndexBuffer(terrainIndices); // You'll need to write this helper
+            spdlog::debug("Terrain Mesh Loaded: Vertices={}, Indices={}", terrainVertices.size(), terrainIndexCount);
+            if (!terrainVertices.empty()) {
+                spdlog::debug("First vertex pos: ({}, {}, {})", terrainVertices[0].pos.x, terrainVertices[0].pos.y, terrainVertices[0].pos.z);
+            }
             spdlog::info("Terrain mesh loaded and Vulkan buffers created.");
         } else {
             // Handle error - perhaps throw an exception or default to no terrain
