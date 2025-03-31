@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <cstdlib>
 
-int SDL_main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     common::InitializeLogging("VkProjectOne");
     spdlog::info("Starting VkProjectOne Application...");
 

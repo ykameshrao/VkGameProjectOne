@@ -121,4 +121,8 @@ target_link_libraries(VkProjectOne PRIVATE
         glm::glm
 )
 
+if(WIN32)
+    target_compile_definitions(main PRIVATE main=SDL_main)
+endif()
+
 message(STATUS "VkProjectOne setup complete with spdlog and fetched glm. Configure and build.")
