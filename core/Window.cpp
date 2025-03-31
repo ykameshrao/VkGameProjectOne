@@ -8,13 +8,20 @@
 namespace vk_project_one {
     // Use new namespace
 
-    Window::Window(int width, int height, std::string title) {
+    Window::Window(const int width, const int height, std::string title) {
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             const std::string errorMsg = "SDL_Init failed: " + std::string(SDL_GetError());
             spdlog::critical(errorMsg);
             throw std::runtime_error(errorMsg);
         }
         spdlog::debug("SDL Initialized. Creating window...");
+
+        if (SDL_Vulkan_LoadLibrary(nullptr) == -1) {
+            const std::string errorMsg = "SDL_Vulkan_LoadLibrary failed: " + std::string(SDL_GetError());
+            spdlog::critical(errorMsg);
+            throw std::runtime_error(errorMsg);
+        }
+
         sdlWindow = SDL_CreateWindow(
             title.c_str(),
             SDL_WINDOWPOS_CENTERED,

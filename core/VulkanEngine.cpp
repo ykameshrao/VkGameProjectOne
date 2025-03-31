@@ -11,6 +11,7 @@
 #include <optional>
 #include <fstream>
 #include <chrono>
+#include <algorithm>
 
 // Dependencies
 #include <SDL2/SDL_vulkan.h> // For surface creation and drawable size
