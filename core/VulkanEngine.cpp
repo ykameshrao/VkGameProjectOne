@@ -212,7 +212,6 @@ namespace vk_project_one {
         createSyncObjects();
         std::vector<VkProjectOne::TerrainVertex> terrainVertices;
         std::vector<uint32_t> terrainIndices;
-        // Adjust path, scales as needed
         if (VkProjectOne::TerrainLoader::LoadFromHeightmap("assets/heightmaps/terrain_one_hmap.png", 1.0f, 10.0f,
                                                            terrainVertices, terrainIndices)) {
             terrainIndexCount = terrainIndices.size(); // Store index count member
