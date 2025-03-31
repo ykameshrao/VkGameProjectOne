@@ -108,7 +108,6 @@ endif()
 
 # --- Link Dependencies ---
 target_include_directories(VkProjectOne PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
         ${SDL2_INCLUDE_DIRS}
         ${Vulkan_INCLUDE_DIRS}
         ${STB_DOWNLOAD_DIR}

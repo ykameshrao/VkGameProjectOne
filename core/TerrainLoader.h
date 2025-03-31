@@ -3,6 +3,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include "Terrain.h"
 
 namespace VkProjectOne::TerrainLoader {
