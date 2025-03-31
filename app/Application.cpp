@@ -29,12 +29,17 @@ namespace vk_project_one {
 
         while (!quit) {
             while (SDL_PollEvent(&e) != 0) {
-                if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
+                if (e.type == SDL_EVENT_QUIT) { // Use SDL_EVENT_QUIT
                     quit = true;
                 }
-                if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    spdlog::debug("Window resize event detected.");
-                    vulkanEngine->notifyFramebufferResized();
+                if (e.type == SDL_EVENT_KEY_DOWN) { // Use SDL_EVENT_KEY_DOWN
+                    if (e.key.scancode == SDL_SCANCODE_ESCAPE) {
+                        quit = true;
+                    }
+                }
+                if (e.type == SDL_EVENT_WINDOW_RESIZED) { // Specific event for resize
+                    spdlog::debug("Window resize event detected (SDL_EVENT_WINDOW_RESIZED).");
+                    vulkanEngine->notifyFramebufferResized(); // Signal engine to recreate swapchain
                 }
             }
 

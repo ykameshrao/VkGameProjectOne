@@ -4,17 +4,16 @@
 #include "core/Window.h"
 #include <spdlog/spdlog.h>
 #include <stdexcept>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h>
 
 namespace vk_project_one {
-    // Use new namespace
-
     Window::Window(const int width, const int height, std::string title) {
         if (SDL_Init(SDL_INIT_VIDEO) < 0) {
             const std::string errorMsg = "SDL_Init failed: " + std::string(SDL_GetError());
             spdlog::critical(errorMsg);
             throw std::runtime_error(errorMsg);
         }
-        spdlog::debug("SDL Initialized. Creating window...");
 
         if (SDL_Vulkan_LoadLibrary(nullptr) == -1) {
             const std::string errorMsg = "SDL_Vulkan_LoadLibrary failed: " + std::string(SDL_GetError());
@@ -22,14 +21,18 @@ namespace vk_project_one {
             throw std::runtime_error(errorMsg);
         }
 
-        sdlWindow = SDL_CreateWindow(
-            title.c_str(),
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            width,
-            height,
-            SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN
-        );
+        spdlog::debug("SDL Initialized. Creating window...");
+        SDL_PropertiesID props = SDL_CreateProperties();
+        SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title.c_str());
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width);
+        SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height);
+        SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_VULKAN_BOOLEAN, true);
+        SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, true);
+
+        sdlWindow = SDL_CreateWindowWithProperties(props);
+        SDL_DestroyProperties(props);
 
         if (sdlWindow == nullptr) {
             const char *sdlError = SDL_GetError();
@@ -54,16 +57,11 @@ namespace vk_project_one {
         spdlog::info("Window destroyed.");
     }
 
-    VkResult Window::createSurface(VkInstance instance, VkSurfaceKHR *surface) const {
-        if (!SDL_Vulkan_CreateSurface(sdlWindow, instance, surface)) {
-            spdlog::error("SDL_Vulkan_CreateSurface failed: {}", SDL_GetError());
-            return VK_ERROR_INITIALIZATION_FAILED;
-        }
-        spdlog::debug("Vulkan Surface created via SDL.");
-        return VK_SUCCESS;
-    }
-
     void Window::getFramebufferSize(int *width, int *height) const {
-        SDL_Vulkan_GetDrawableSize(sdlWindow, width, height);
+        if (SDL_GetWindowSizeInPixels(sdlWindow, width, height) != 0) {
+            spdlog::error("SDL_GetWindowSizeInPixels failed: {}", SDL_GetError());
+            if (width) *width = 0;
+            if (height) *height = 0;
+        }
     }
 } // namespace VkGameProjectOne

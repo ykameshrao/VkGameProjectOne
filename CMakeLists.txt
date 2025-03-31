@@ -56,8 +56,9 @@ else()
 endif()
 
 # --- Find Standard Dependencies ---
-find_package(SDL2 REQUIRED)
-message(STATUS "Found SDL2: ${SDL2_LIBRARIES}")
+find_package(SDL3 REQUIRED)
+message(STATUS "Found SDL3 Includes: ${SDL3_INCLUDE_DIRS}")
+message(STATUS "Found SDL3 Libraries: ${SDL3_LIBRARIES}")
 
 find_package(Vulkan REQUIRED)
 message(STATUS "Found Vulkan: ${Vulkan_LIBRARIES}")
@@ -112,7 +113,7 @@ endif()
 
 # --- Link Dependencies ---
 target_include_directories(VkProjectOne PRIVATE
-        ${SDL2_INCLUDE_DIRS}
+        ${SDL3_INCLUDE_DIRS}
         ${Vulkan_INCLUDE_DIRS}
         ${STB_DOWNLOAD_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
@@ -121,7 +122,7 @@ target_include_directories(VkProjectOne PRIVATE
 )
 
 target_link_libraries(VkProjectOne PRIVATE
-        ${SDL2_LIBRARIES}
+        ${SDL3_LIBRARIES}
         ${Vulkan_LIBRARIES}
         spdlog::spdlog
         glm::glm

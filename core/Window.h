@@ -3,10 +3,8 @@
 
 #pragma once
 #define SDL_MAIN_HANDLED
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_vulkan.h>
+#include <SDL3/SDL.h>
 #include <string>
-#include <vulkan/vulkan.h>
 
 namespace vk_project_one {
     // Use new namespace
@@ -20,8 +18,6 @@ namespace vk_project_one {
         Window(const Window &) = delete;
 
         Window &operator=(const Window &) = delete;
-
-        VkResult createSurface(VkInstance instance, VkSurfaceKHR *surface) const;
 
         SDL_Window *getSdlWindow() const { return sdlWindow; }
 

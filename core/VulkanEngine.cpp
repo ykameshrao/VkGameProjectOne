@@ -14,10 +14,11 @@
 #include <algorithm>
 
 // Dependencies
-#include <SDL2/SDL_vulkan.h> // For surface creation and drawable size
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h> // For surface creation and drawable size
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE // Vulkan clip space
-#include <SDL_events.h>
+#include <SDL3/SDL_events.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -255,10 +256,25 @@ namespace vk_project_one {
         createInfo.pApplicationInfo = &appInfo;
 
         // Get required extensions (SDL + Debug + Portability)
-        uint32_t sdlExtensionCount = 0;
-        SDL_Vulkan_GetInstanceExtensions(window, &sdlExtensionCount, nullptr);
-        std::vector<const char *> requiredExtensions(sdlExtensionCount);
-        SDL_Vulkan_GetInstanceExtensions(window, &sdlExtensionCount, requiredExtensions.data());
+        unsigned int sdlExtensionCount = 0;
+        const char * const * sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+        if (sdlExtensions == nullptr) {
+            const std::string errorMsg = "Failed to get SDL Vulkan instance extensions: " + std::string(SDL_GetError());
+            spdlog::critical(errorMsg);
+            throw std::runtime_error(errorMsg);
+        }
+
+        std::vector<const char*> requiredExtensions;
+        requiredExtensions.reserve(sdlExtensionCount);
+        spdlog::debug("SDL required instance extensions (Count: {}):", static_cast<int>(sdlExtensionCount));
+        for (unsigned int i = 0; i < sdlExtensionCount; ++i) {
+            if (sdlExtensions[i]) { // Basic null check
+                requiredExtensions.push_back(sdlExtensions[i]);
+                spdlog::debug("  - {}", sdlExtensions[i]);
+            } else {
+                spdlog::warn("SDL returned a null extension name at index {}", i);
+            }
+        }
 
         spdlog::debug("SDL required instance extensions:");
         for (const char *ext: requiredExtensions) spdlog::debug("  - {}", ext);
@@ -376,7 +392,7 @@ namespace vk_project_one {
         // VkResult Window::createSurface(VkInstance instance, VkSurfaceKHR* surface);
         // (Implementation would call SDL_Vulkan_CreateSurface)
 
-        if (!SDL_Vulkan_CreateSurface(window, instance, &surface)) {
+        if (!SDL_Vulkan_CreateSurface(window, instance, nullptr, &surface)) {
             std::string errorMsg = "SDL_Vulkan_CreateSurface failed: " + std::string(SDL_GetError());
             spdlog::critical(errorMsg);
             throw std::runtime_error(errorMsg);
@@ -654,7 +670,7 @@ namespace vk_project_one {
         } else {
             // Otherwise, get size from SDL window and clamp to capabilities
             int width, height;
-            SDL_Vulkan_GetDrawableSize(window, &width, &height); // Use SDL func for high-DPI awareness
+            SDL_GetWindowSizeInPixels(window, &width, &height); // Use SDL func for high-DPI awareness
             spdlog::debug("Window drawable size: {}x{}", width, height);
 
             VkExtent2D actualExtent = {
@@ -1600,10 +1616,10 @@ namespace vk_project_one {
 
         // Handle minimization: pause rendering until window has size > 0
         int width = 0, height = 0;
-        SDL_Vulkan_GetDrawableSize(window, &width, &height);
+        SDL_GetWindowSizeInPixels(window, &width, &height);
         while (width == 0 || height == 0) {
             spdlog::debug("Window minimized, waiting for resize...");
-            SDL_Vulkan_GetDrawableSize(window, &width, &height);
+            SDL_GetWindowSizeInPixels(window, &width, &height);
             SDL_WaitEvent(nullptr); // Wait for any SDL event
         }
         spdlog::debug("Window has size {}x{}, proceeding with swap chain recreation.", width, height);
