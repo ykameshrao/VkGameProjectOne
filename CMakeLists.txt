@@ -59,7 +59,7 @@ find_package(Vulkan REQUIRED)
 message(STATUS "Found Vulkan: ${Vulkan_LIBRARIES}")
 
 # --- Executable Target ---
-add_executable(VkGameProjectOne
+add_executable(VkProjectOne
         main.cpp
         common/Log.cpp
         app/Application.cpp
@@ -107,7 +107,7 @@ else()
 endif()
 
 # --- Link Dependencies ---
-target_include_directories(VkGameProjectOne PRIVATE
+target_include_directories(VkProjectOne PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${SDL2_INCLUDE_DIRS}
         ${Vulkan_INCLUDE_DIRS}
@@ -115,11 +115,11 @@ target_include_directories(VkGameProjectOne PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_link_libraries(VkGameProjectOne PRIVATE
+target_link_libraries(VkProjectOne PRIVATE
         ${SDL2_LIBRARIES}
         ${Vulkan_LIBRARIES}
         spdlog::spdlog
         glm::glm
 )
 
-message(STATUS "VkGameProjectOne setup complete with spdlog and fetched glm. Configure and build.")
+message(STATUS "VkProjectOne setup complete with spdlog and fetched glm. Configure and build.")
