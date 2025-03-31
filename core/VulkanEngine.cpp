@@ -3,7 +3,7 @@
 #include "VulkanEngine.h"
 
 // Core Libraries
-#include <cmake-build-debug/_deps/spdlog-src/include/spdlog/spdlog.h>
+#include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <vector>
 #include <set>
@@ -18,8 +18,8 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE // Vulkan clip space
 #include <SDL_events.h>
-#include <cmake-build-debug/_deps/glm-src/glm/glm.hpp>
-#include <cmake-build-debug/_deps/glm-src/glm/gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "TerrainLoader.h"
 

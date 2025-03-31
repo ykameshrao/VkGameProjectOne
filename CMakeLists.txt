@@ -116,6 +116,8 @@ target_include_directories(VkProjectOne PRIVATE
         ${Vulkan_INCLUDE_DIRS}
         ${STB_DOWNLOAD_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/_deps/spdlog-src/include/
+        ${CMAKE_CURRENT_SOURCE_DIR}/_deps/glm-src/
 )
 
 target_link_libraries(VkProjectOne PRIVATE

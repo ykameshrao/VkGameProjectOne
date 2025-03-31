@@ -11,7 +11,7 @@
 // GLM math library
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE // Vulkan clip space is [0, 1]
-#include <cmake-build-debug/_deps/glm-src/glm/glm.hpp>
+#include <glm/glm.hpp>
 
 #include "Terrain.h"
 

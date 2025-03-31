@@ -2,7 +2,7 @@
 // Window.cpp
 
 #include "core/Window.h"
-#include <cmake-build-debug/_deps/spdlog-src/include/spdlog/spdlog.h>
+#include <spdlog/spdlog.h>
 #include <stdexcept>
 
 namespace vk_project_one {
